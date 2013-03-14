@@ -3,6 +3,7 @@ library(tm)
 library(wordcloud)
 library(stringr)
 library(openNLP)
+library(plyr)
 
 scrapePrisjakt <- function(.url){
   s <- 0
@@ -100,8 +101,10 @@ cloud <- function(.sentences, .filter, .palette, .features){
   v <- sort(rowSums(m),decreasing=TRUE)
   #v <- v[!match(names(v), .filter, F)]  
   print(v[1:100])
-  v <- v[match(names(v), .features, F)]  
+  v <- subset(v, !!match(names(v), .features, F))
+  v <- subset(v, !!match(names(v), .features, F))
   
+  print(v[1:100])
   d <- data.frame(word = names(v),freq=v)
   pal <- brewer.pal(9, .palette)
   pal <- pal[-(1:2)]
@@ -118,12 +121,16 @@ sgs2 <- scrapePrisjakt("http://www.prisjakt.nu/produkt.php?o=838917")   # SGSII
 iphone4 <- scrapePrisjakt("http://www.prisjakt.nu/produkt.php?o=630392")   # iPhone 4
 
 sentences <- unlist(lapply(iphone4, sentDetect))  
+sentences <- unlist(lapply(desire, sentDetect))  
+sentences <- unlist(lapply(iphone4, sentDetect))  
+sentences <- unlist(lapply(iphone4, sentDetect))  
+
 sentences.scored <- score.sentiment(sentences, pos, neg)
 
 bad <- subset(sentences.scored, score<0)$text
 good <- subset(sentences.scored, score>0)$text
 
-features <- c("design", "batteritid", "skärm", "kamera")
+features <- c("design", "batteritid", "skärm", "kamera", "dyr", "upplösning","snabb","snabare" )
 
 cloud(bad, neg, "Reds", features)
 cloud(good, pos, "BuGn", features)
